@@ -36,12 +36,7 @@ public class Level extends Component {
 		info.levelOld(level);
 		Integer removed = info.linesRemoved();
 		if (removed != null && removed > 0) {
-			levelLines += switch (removed) {
-				case 4 -> 8;
-				case 3 -> 5;
-				case 2 -> 3;
-				default -> 1;
-			};
+			levelLines += levelLines(removed);
 			if (levelLines >= (level + 1) * 5) {
 				levelLines = 0;
 				level++;
@@ -51,6 +46,15 @@ public class Level extends Component {
 		boolean win = level > MAX_LEVEL;
 		if (win) info.win(true);
 		info.levelNew(win ? MAX_LEVEL : level);
+	}
+	
+	private int levelLines(int linesRemoved) {
+		switch (linesRemoved) {
+			case 4: return 8;
+			case 3: return 5;
+			case 2: return 3;
+			default: return 1;
+		}
 	}
 	
 	public int startRow() {

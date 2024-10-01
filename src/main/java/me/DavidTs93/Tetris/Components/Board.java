@@ -148,9 +148,9 @@ public class Board extends Component implements ActionListener {
 		List<Colors[]> list = new ArrayList<>(Arrays.asList(board));
 		for (int row : removed) {
 			int len = list.remove(row).length;
-			list.addFirst(new Colors[len]);
+			list.add(0,new Colors[len]);
 		}
-		board = list.toArray(Colors[][]::new);
+		board = list.toArray(new Colors[list.size()][]);
 	}
 	
 	private CompletableFuture<TurnInfo> down(boolean button) {
@@ -227,14 +227,16 @@ public class Board extends Component implements ActionListener {
 	}
 	
 	public CompletableFuture<TurnInfo> update(MoveType moveType) {
-		return piece() == null || game().state() != TetrisGame.State.PLAY ? CompletableFuture.completedFuture(null) : switch (moveType) {
-			case ROTATE_CLOCKWISE -> rotate(true);
-			case ROTATE_COUNTERCLOCKWISE -> rotate(false);
-			case RIGHT -> move(true);
-			case LEFT -> move(false);
-			case DROP -> drop();
-			case DOWN -> down(true);
-		};
+		if (piece() == null || game().state() != TetrisGame.State.PLAY) return CompletableFuture.completedFuture(null);
+		switch (moveType) {
+			case ROTATE_CLOCKWISE: return rotate(true);
+			case ROTATE_COUNTERCLOCKWISE: return rotate(false);
+			case RIGHT: return move(true);
+			case LEFT: return move(false);
+			case DROP: return drop();
+			case DOWN: return down(true);
+			default: throw new IllegalArgumentException();
+		}
 	}
 	
 	public int startRow() {

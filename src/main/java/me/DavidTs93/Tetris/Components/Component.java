@@ -58,7 +58,7 @@ public abstract class Component extends JPanel implements Resizeable {
 	
 	@Override
 	public java.awt.Component add(java.awt.Component comp) {
-		if (comp instanceof Resizeable resizeable) resizeables.add(resizeable);
+		if (comp instanceof Resizeable) resizeables.add((Resizeable) comp);
 		return super.add(comp);
 	}
 	

@@ -1,6 +1,22 @@
 package me.DavidTs93.Tetris;
 
-public record Coordinates(int row,int column) {
+public class Coordinates {
+	private final int row;
+	private final int column;
+	
+	public Coordinates(int row,int column) {
+		this.row = row;
+		this.column = column;
+	}
+	
+	public int row() {
+		return row;
+	}
+	
+	public int column() {
+		return column;
+	}
+	
 	public Coordinates add(int row,int column) {
 		return new Coordinates(row() + row,column() + column);
 	}
@@ -10,7 +26,9 @@ public record Coordinates(int row,int column) {
 	}
 	
 	public boolean equals(Object obj) {
-		return (obj instanceof Coordinates coordinates) && coordinates.row() == row() && coordinates.column() == column();
+		if (!(obj instanceof Coordinates)) return false;
+		Coordinates coordinates = (Coordinates) obj;
+		return coordinates.row() == row() && coordinates.column() == column();
 	}
 	
 	public String toString() {

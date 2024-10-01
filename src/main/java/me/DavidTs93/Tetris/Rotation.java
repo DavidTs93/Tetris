@@ -7,20 +7,22 @@ public enum Rotation {
 	THREE;
 	
 	public Rotation next() {
-		return switch (this) {
-			case ZERO -> ONE;
-			case ONE -> TWO;
-			case TWO -> THREE;
-			case THREE -> ZERO;
-		};
+		switch (this) {
+			case ZERO: return ONE;
+			case ONE: return TWO;
+			case TWO: return THREE;
+			case THREE: return ZERO;
+			default: throw new IllegalArgumentException();
+		}
 	}
 	
 	public Rotation previous() {
-		return switch (this) {
-			case ZERO -> THREE;
-			case ONE -> ZERO;
-			case TWO -> ONE;
-			case THREE -> TWO;
-		};
+		switch (this) {
+			case ZERO: return THREE;
+			case ONE: return ZERO;
+			case TWO: return ONE;
+			case THREE: return TWO;
+			default: throw new IllegalArgumentException();
+		}
 	}
 }

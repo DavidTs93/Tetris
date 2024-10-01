@@ -6,8 +6,11 @@ import me.DavidTs93.Tetris.Components.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TetrisGame extends JFrame implements ActionListener {
@@ -29,16 +32,19 @@ public class TetrisGame extends JFrame implements ActionListener {
 		int maxWidth = dm.getWidth(),maxHeight = dm.getHeight();
 		int size = Math.min(maxWidth * 7 / 10,maxHeight * 7 / 10);
 		setPreferredSize(new Dimension(size,size));
+		setMinimumSize(new Dimension(size,size));
+		setSize(new Dimension(size,size));
 		this.state = State.START;
 		this.board = new Board(this);
-		this.components = Stream.of(new Empty(this),new Title(this),new Next(this),new Statistics(this),new Lines(this),new Level(this),new Score(this),this.board).toList();
+		this.components = Stream.of(new Empty(this),new Title(this),new Next(this),new Statistics(this),new Lines(this),new Level(this),new Score(this),this.board).collect(Collectors.toList());
 		afterResize(size,size);
-		this.components.reversed().forEach(this::add);
+		List<Component> componentsAdd = new ArrayList<>(this.components);
+		Collections.reverse(componentsAdd);
+		componentsAdd.forEach(this::add);
 		addComponentListener(new GameResizeAdapter());
 		addKeyListener(new GameKeyAdapter());
 		setFocusable(true);
 		pack();
-		setResizable(false);
 		setVisible(true);
 	}
 	

@@ -61,15 +61,16 @@ public class Statistics extends Component {
 		}
 		
 		private int rowTetromino(Tetromino tetromino) {
-			return switch (tetromino) {
-				case I -> 3;
-				case J -> 6;
-				case L -> 9;
-				case O -> 11;
-				case S -> 15;
-				case T -> 18;
-				case Z -> 21;
-			};
+			switch (tetromino) {
+				case I: return 3;
+				case J: return 6;
+				case L: return 9;
+				case O: return 11;
+				case S: return 15;
+				case T: return 18;
+				case Z: return 21;
+				default: throw new IllegalArgumentException();
+			}
 		}
 		
 		private int rowText(Tetromino tetromino) {

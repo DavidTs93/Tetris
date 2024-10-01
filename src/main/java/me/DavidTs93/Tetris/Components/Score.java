@@ -42,18 +42,22 @@ public class Score extends Component {
 		info.scoreAdd(null);
 		Integer removed = info.linesRemoved();
 		if (removed != null && removed > 0) {
-			score += (Objects.requireNonNull(info.levelOld()) + 1) * switch (removed) {
-				case 4 -> 1200;
-				case 3 -> 300;
-				case 2 -> 100;
-				default -> 40;
-			};
+			score += (Objects.requireNonNull(info.levelOld()) + 1) * scoreLines(removed);
 			update = true;
 		}
 		if (update) update();
 		boolean win = score > MAX_SCORE;
 		if (win) info.win(true);
 		info.scoreNew(win ? MAX_SCORE : score);
+	}
+	
+	private int scoreLines(int linesRemoved) {
+		switch (linesRemoved) {
+			case 4: return 1200;
+			case 3: return 300;
+			case 2: return 100;
+			default: return 40;
+		}
 	}
 	
 	public int startRow() {

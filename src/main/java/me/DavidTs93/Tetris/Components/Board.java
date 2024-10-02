@@ -7,6 +7,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,6 +42,15 @@ public class Board extends Component implements ActionListener {
 		add(this.piecePanel);
 		this.boardPanel = new BoardPanel();
 		add(this.boardPanel);
+		addKeyListener(new DownAdapter());
+	}
+	
+	private class DownAdapter extends KeyAdapter {
+		@Override
+		public void keyPressed(KeyEvent e) {
+			System.out.println("DOWN");
+			if (e.getKeyCode() == KeyEvent.VK_DOWN) game().update(update(MoveType.DOWN));
+		}
 	}
 	
 	@Override
@@ -95,7 +106,8 @@ public class Board extends Component implements ActionListener {
 		newPiece(info.piece());
 	}
 	
-	private TurnInfo addLinesBonus(TurnInfo info,int lines,boolean drop) {
+	private TurnInfo addLinesBonus(TurnInfo info,Integer lines,boolean drop) {
+		if (lines == null || lines < 1) return info;
 		int scoreAdd = lines;
 		if (drop) scoreAdd *= 2;
 		return info.scoreAdd(scoreAdd);
@@ -153,26 +165,47 @@ public class Board extends Component implements ActionListener {
 		board = list.toArray(new Colors[list.size()][]);
 	}
 	
-	private CompletableFuture<TurnInfo> down(boolean button) {
-		TurnInfo info = new TurnInfo(piece());
+	private TurnInfo downButton() {
+		TurnInfo info = null;
 		Coordinates newCoordinates = coordinates.add(1,0);
 		if (piece().testPlacing(rotation(),newCoordinates,board)) {
 			coordinates = newCoordinates;
-			if (button) {
-				addLinesBonus(info,1,false);
-				timer.restart();
-			}
-			return CompletableFuture.completedFuture(info);
-		} else {
-			if (button) return CompletableFuture.completedFuture(null);
-			pause();
-			info.turnOver(true);
-			piece().fill(rotation(),coordinates,board).forEach(coordinate -> board[coordinate.row()][coordinate.column()] = piece().colors());
-//			boardPanel.repaint();
-			CompletableFuture<TurnInfo> completable = new CompletableFuture<>();
-			info.linesRemoved(removeLines(completable,info));
-			return completable;
+			info = addLinesBonus(new TurnInfo(piece()),1,false);
+			timer.restart();
 		}
+		return info;
+	}
+	
+	private CompletableFuture<TurnInfo> downTurnOver(Integer lines,boolean drop) {
+		if (lines != null) coordinates = coordinates.add(lines,0);
+		piece().fill(rotation(),coordinates,board).forEach(coordinate -> board[coordinate.row()][coordinate.column()] = piece().colors());
+		CompletableFuture<TurnInfo> completable = new CompletableFuture<>();
+		TurnInfo info = addLinesBonus(new TurnInfo(piece()),lines,drop).turnOver(true);
+		info.linesRemoved(removeLines(completable,info));
+		return completable;
+	}
+	
+	private CompletableFuture<TurnInfo> downTimer() {
+		pause();
+		Coordinates newCoordinates = coordinates.add(1,0);
+		if (piece().testPlacing(rotation(),newCoordinates,board)) {
+			coordinates = newCoordinates;
+			unpause();
+			return CompletableFuture.completedFuture(new TurnInfo(piece()));
+		}
+		return downTurnOver(null,false);
+	}
+	
+	private CompletableFuture<TurnInfo> drop() {
+		pause();
+		int lines = 0;
+		do {
+			lines++;
+		} while (piece().testPlacing(rotation(),coordinates.add(lines,0),board));
+		lines--;
+		if (lines > 0) return downTurnOver(lines,true);
+		unpause();
+		return CompletableFuture.completedFuture(null);
 	}
 	
 	private CompletableFuture<TurnInfo> rotate(boolean next) {
@@ -188,29 +221,14 @@ public class Board extends Component implements ActionListener {
 		return CompletableFuture.completedFuture(info);
 	}
 	
-	private CompletableFuture<TurnInfo> move(boolean right) {
+	private TurnInfo move(boolean right) {
 		Coordinates newCoordinates = right ? coordinates.add(0,1) : coordinates.subtract(0,1);
 		TurnInfo info = null;
 		if (piece().testPlacing(rotation(),newCoordinates,board)) {
 			coordinates = newCoordinates;
 			info = new TurnInfo(piece());
 		}
-		return CompletableFuture.completedFuture(info);
-	}
-	
-	private CompletableFuture<TurnInfo> drop() {
-		int lines = 0;
-		do {
-			lines++;
-		} while (piece().testPlacing(rotation(),coordinates.add(lines,0),board));
-		lines--;
-		TurnInfo info = null;
-		if (lines > 0) {
-			coordinates = coordinates.add(lines,0);
-			timer.restart();
-			info = addLinesBonus(new TurnInfo(piece()),lines,true);
-		}
-		return CompletableFuture.completedFuture(info);
+		return info;
 	}
 	
 	private void setTimer(Integer level) {
@@ -229,12 +247,12 @@ public class Board extends Component implements ActionListener {
 	public CompletableFuture<TurnInfo> update(MoveType moveType) {
 		if (piece() == null || game().state() != TetrisGame.State.PLAY) return CompletableFuture.completedFuture(null);
 		switch (moveType) {
+			case RIGHT: return CompletableFuture.completedFuture(move(true));
+			case LEFT: return CompletableFuture.completedFuture(move(false));
+			case DOWN: return CompletableFuture.completedFuture(downButton());
 			case ROTATE_CLOCKWISE: return rotate(true);
 			case ROTATE_COUNTERCLOCKWISE: return rotate(false);
-			case RIGHT: return move(true);
-			case LEFT: return move(false);
 			case DROP: return drop();
-			case DOWN: return down(true);
 			default: throw new IllegalArgumentException();
 		}
 	}
@@ -256,7 +274,7 @@ public class Board extends Component implements ActionListener {
 	}
 	
 	public void actionPerformed(ActionEvent e) {
-		game().update(down(false));
+		game().update(downTimer());
 	}
 	
 	private class BoardPanel extends JPanel implements Resizeable {

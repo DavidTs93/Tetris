@@ -3,12 +3,12 @@ package me.DavidTs93.Tetris;
 import me.DavidTs93.Tetris.Components.Component;
 import me.DavidTs93.Tetris.Components.*;
 
+import javax.swing.Timer;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -16,7 +16,6 @@ import java.util.stream.Stream;
 public class TetrisGame extends JFrame implements ActionListener {
 	private static final int SIDE_COLUMNS = 10;
 	private static final int TOTAL = Board.BOARD_COLUMNS + 2 + (SIDE_COLUMNS * 2);
-	
 	private static final int SIZE_RATIO = 10;
 	
 	private int unit,squareSize,width,height,offsetX,offsetY;
@@ -133,21 +132,61 @@ public class TetrisGame extends JFrame implements ActionListener {
 	}
 	
 	private class GameKeyAdapter extends KeyAdapter {
+		private static final int ROTATE_CLOCKWISE = KeyEvent.VK_W;
+		private static final int ROTATE_COUNTERCLOCKWISE = KeyEvent.VK_E;
+		
+		private final Set<Integer> pressedKeys = new HashSet<>();
+		private final MoveActionListener moveListener = new MoveActionListener();
+		private final DownActionListener downListener = new DownActionListener();
+		
+		private void stop() {
+			moveListener.stop();
+			downListener.stop();
+		}
+		
+		private void start() {
+			moveListener.start();
+			downListener.start();
+		}
+		
+		private void restart() {
+			stop();
+			start();
+		}
+		
+		@Override
+		public void keyReleased(KeyEvent e) {
+			int key = e.getKeyCode();
+			if (key == KeyEvent.VK_RIGHT) moveListener.remove(true);
+			else if (key == KeyEvent.VK_LEFT) moveListener.remove(false);
+			else if (key == KeyEvent.VK_DOWN) downListener.remove();
+			else pressedKeys.remove(key);
+		}
+		
 		@Override
 		public void keyPressed(KeyEvent e) {
 			int key = e.getKeyCode();
-			MoveType moveType = null;
-			if (key == KeyEvent.VK_LEFT) moveType = MoveType.LEFT;
-			else if (key == KeyEvent.VK_RIGHT) moveType = MoveType.RIGHT;
-			else if (key == KeyEvent.VK_UP) moveType = MoveType.ROTATE_CLOCKWISE;
-			else if (key == KeyEvent.VK_DOWN) moveType = MoveType.DOWN;
-			else if (key == KeyEvent.VK_ESCAPE) {
+			boolean done = true;
+			if (key == KeyEvent.VK_RIGHT) moveListener.add(true);
+			else if (key == KeyEvent.VK_LEFT) moveListener.add(false);
+			else if (key == KeyEvent.VK_DOWN) downListener.add();
+			else done = false;
+			if (done) return;
+			if (!pressedKeys.add(key)) return;
+			done = true;
+			if (key == ROTATE_CLOCKWISE) update(board.update(MoveType.ROTATE_CLOCKWISE));
+			else if (key == ROTATE_COUNTERCLOCKWISE) update(board.update(MoveType.ROTATE_COUNTERCLOCKWISE));
+			else done = false;
+			if (done) return;
+			if (key == KeyEvent.VK_ESCAPE) {
 				if (state == State.PLAY) {
 					state = State.PAUSE;
 					changeState(State.PLAY);
+					stop();
 				} else if (state == State.PAUSE) {
 					state = State.PLAY;
 					changeState(State.PAUSE);
+					start();
 				} else return;
 				redraw();
 			} else if (key == KeyEvent.VK_SPACE) {
@@ -157,12 +196,87 @@ public class TetrisGame extends JFrame implements ActionListener {
 					components.forEach(component -> component.newGame(info));
 					state = State.PLAY;
 					changeState(oldState);
+					start();
 					redraw();
-					return;
+				} else if (state.isGameRunning()) {
+					update(board.update(MoveType.DROP));
+					restart();
 				}
-				if (state.isGameRunning()) moveType = MoveType.DROP;
 			}
-			if (moveType != null) update(board.update(moveType));
+		}
+		
+		private class MoveActionListener extends Timer implements ActionListener {
+			private boolean pressedRight = false;
+			private boolean pressedLeft = false;
+			private Boolean moveRight = null;
+			
+			private MoveActionListener() {
+				super(60,null);
+				stop();
+				setInitialDelay(0);
+				addActionListener(this);
+			}
+			
+			public void add(boolean right) {
+				if (right) {
+					if (pressedRight) return;
+					pressedRight = true;
+					moveRight = true;
+				} else {
+					if (pressedLeft) return;
+					pressedLeft = true;
+					moveRight = false;
+				}
+				start();
+			}
+			
+			public void remove(boolean right) {
+				if (right) {
+					pressedRight = false;
+					if (pressedLeft) moveRight = false;
+					else {
+						moveRight = null;
+						moveListener.stop();
+					}
+				} else {
+					pressedLeft = false;
+					if (pressedRight) moveRight = true;
+					else {
+						moveRight = null;
+						moveListener.stop();
+					}
+				}
+			}
+			
+			public void actionPerformed(ActionEvent e) {
+				if (moveRight != null) update(board.update(moveRight ? MoveType.RIGHT : MoveType.LEFT));
+			}
+		}
+		
+		private class DownActionListener extends Timer implements ActionListener {
+			private boolean isPressed = false;
+			
+			private DownActionListener() {
+				super(40,null);
+				stop();
+				setInitialDelay(0);
+				addActionListener(this);
+			}
+			
+			public void add() {
+				if (isPressed) return;
+				isPressed = true;
+				start();
+			}
+			
+			public void remove() {
+				isPressed = false;
+				stop();
+			}
+			
+			public void actionPerformed(ActionEvent e) {
+				if (isPressed) update(board.update(MoveType.DOWN));
+			}
 		}
 	}
 	

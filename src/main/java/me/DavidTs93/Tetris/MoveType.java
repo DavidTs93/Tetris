@@ -4,7 +4,7 @@ public enum MoveType {
 	ROTATE_CLOCKWISE,
 	ROTATE_COUNTERCLOCKWISE,
 	DROP,
-	DOWN,
 	RIGHT,
-	LEFT;
+	LEFT,
+	DOWN;
 }

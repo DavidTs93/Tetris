@@ -1,7 +1,10 @@
 package me.DavidTs93.Tetris.Displays;
 
-import me.DavidTs93.Tetris.Components.Component;
-import me.DavidTs93.Tetris.*;
+import me.DavidTs93.Tetris.Info.Coordinates;
+import me.DavidTs93.Tetris.Info.Rotation;
+import me.DavidTs93.Tetris.Info.State;
+import me.DavidTs93.Tetris.Parts.TetrisPart;
+import me.DavidTs93.Tetris.Parts.Tetromino;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,8 +12,8 @@ import java.awt.image.BufferedImage;
 import java.util.Objects;
 import java.util.function.BiFunction;
 
-public class PiecePanel extends JPanel implements Resizeable {
-	protected final Component parent;
+public class PiecePanel extends JPanel implements Display {
+	protected final TetrisPart parent;
 	protected final BiFunction<Tetromino,Rotation,Coordinates> coordinatesSupplier;
 	private Tetromino piece;
 	private BufferedImage pieceImage;
@@ -18,7 +21,7 @@ public class PiecePanel extends JPanel implements Resizeable {
 	private boolean noDisplayOnStart = false;
 	private boolean repaintOnUpdate = false;
 	
-	public PiecePanel(Component parent,BiFunction<Tetromino,Rotation,Coordinates> coordinatesSupplier) {
+	public PiecePanel(TetrisPart parent,BiFunction<Tetromino,Rotation,Coordinates> coordinatesSupplier) {
 		this.parent = parent;
 		this.coordinatesSupplier = coordinatesSupplier;
 		setOpaque(false);
@@ -27,9 +30,9 @@ public class PiecePanel extends JPanel implements Resizeable {
 	
 	@Override
 	protected void paintComponent(Graphics g) {
-		if (piece == null || (noDisplayOnStart && parent.game().state() == TetrisGame.State.START)) return;
+		if (piece == null || (noDisplayOnStart && parent.game().state() == State.START)) return;
 		super.paintComponent(g);
-		Coordinates coords = coordinatesSupplier.apply(piece,rotation);/*.add(1,1)*/
+		Coordinates coords = coordinatesSupplier.apply(piece,rotation);
 		Coordinates coordinates = parent.game().indexToPosition(coords);
 		g.drawImage(pieceImage,coordinates.column(),coordinates.row(),this);
 	}
@@ -45,11 +48,9 @@ public class PiecePanel extends JPanel implements Resizeable {
 	}
 	
 	public PiecePanel piece(Tetromino piece) {
-		if (!Objects.equals(this.piece,piece)) {
-			this.piece = piece;
-			if (repaintOnUpdate) redraw();
-		}
-		return this;
+		if (Objects.equals(this.piece,piece)) return this;
+		this.piece = piece;
+		return repaintOnUpdate ? redraw() : this;
 	}
 	
 	public boolean noDisplayOnStart() {
@@ -66,11 +67,9 @@ public class PiecePanel extends JPanel implements Resizeable {
 	}
 	
 	public PiecePanel rotation(Rotation rotation) {
-		if (!Objects.equals(this.rotation,rotation)) {
-			this.rotation = rotation;
-			if (repaintOnUpdate) redraw();
-		}
-		return this;
+		if (Objects.equals(this.rotation,rotation)) return this;
+		this.rotation = rotation;
+		return repaintOnUpdate ? redraw() : this;
 	}
 	
 	public boolean repaintOnUpdate() {
@@ -81,10 +80,11 @@ public class PiecePanel extends JPanel implements Resizeable {
 		this.repaintOnUpdate = repaintOnUpdate;
 	}
 	
-	public void resize() {
-		Coordinates start = parent.game().indexToPosition(new Coordinates(1,1));
-		Coordinates add = parent.game().indexToPosition(new Coordinates(parent.rows(),parent.columns()));
-		setBounds(start.column(),start.row(),add.column(),add.row());
+	public TetrisPart parent() {
+		return parent;
+	}
+	
+	public void afterResize() {
 		redraw();
 	}
 }

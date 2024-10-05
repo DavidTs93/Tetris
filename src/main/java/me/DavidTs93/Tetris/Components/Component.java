@@ -1,16 +1,16 @@
 package me.DavidTs93.Tetris.Components;
 
-import me.DavidTs93.Tetris.*;
+import me.DavidTs93.Tetris.Info.State;
+import me.DavidTs93.Tetris.Info.TurnInfo;
+import me.DavidTs93.Tetris.Parts.Resizeable;
+import me.DavidTs93.Tetris.Parts.TetrisPartResizeable;
+import me.DavidTs93.Tetris.TetrisGame;
 
 import javax.swing.*;
-import javax.swing.border.AbstractBorder;
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Component extends JPanel implements Resizeable {
-	private static final Color BACKGROUND = new Color(255,191,255);
-	
+public abstract class Component extends JPanel implements TetrisPartResizeable {
 	private final TetrisGame game;
 	private final int centerColumn;
 	private final List<Resizeable> resizeables;
@@ -24,28 +24,6 @@ public abstract class Component extends JPanel implements Resizeable {
 		setLayout(null);
 	}
 	
-	protected void setBackground() {
-		setBackground(BACKGROUND);
-	}
-	
-	protected void setBorder() {
-		setBorder(new AbstractBorder() {
-			@Override
-			public void paintBorder(java.awt.Component c,Graphics g,int x,int y,int width,int height) {
-				// Border top + bottom
-				for (int i = 0; i < columns() + 2; i++) {
-					game().drawSquare(g,new Coordinates(0,i),Colors.GRAY);
-					game().drawSquare(g,new Coordinates(endRow() - startRow() + 2,i),Colors.GRAY);
-				}
-				// Border sides
-				for (int i = 0; i < rows() + 2; i++) {
-					game().drawSquare(g,new Coordinates(i,0),Colors.GRAY);
-					game().drawSquare(g,new Coordinates(i,endColumn() - startColumn() + 2),Colors.GRAY);
-				}
-			}
-		});
-	}
-	
 	public final TetrisGame game() {
 		return game;
 	}
@@ -54,7 +32,7 @@ public abstract class Component extends JPanel implements Resizeable {
 		return centerColumn;
 	}
 	
-	public void changeState(TetrisGame.State oldState,TetrisGame.State newState) {}
+	public void changeState(State oldState,State newState) {}
 	
 	@Override
 	public java.awt.Component add(java.awt.Component comp) {
@@ -62,25 +40,10 @@ public abstract class Component extends JPanel implements Resizeable {
 		return super.add(comp);
 	}
 	
-	public void resize() {
-		Coordinates start = game().indexToPositionAbsolute(new Coordinates(startRow() - 1,startColumn() - 1));
-		Coordinates add = game().indexToPosition(new Coordinates(rows() + 2,columns() + 2));
-		setBounds(start.column(),start.row(),add.column(),add.row());
+	public void afterResize() {
 		resizeables.forEach(Resizeable::resize);
 	}
 	
 	public abstract void newGame(TurnInfo info);
 	public abstract void update(TurnInfo info);
-	public abstract int startRow();
-	public abstract int startColumn();
-	public abstract int endRow();
-	public abstract int endColumn();
-	
-	public final int rows() {
-		return endRow() - startRow() + 1;
-	}
-	
-	public final int columns() {
-		return endColumn() - startColumn() + 1;
-	}
 }

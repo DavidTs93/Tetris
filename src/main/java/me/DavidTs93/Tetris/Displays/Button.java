@@ -7,39 +7,35 @@ import me.DavidTs93.Tetris.Parts.TetrisPart;
 import javax.swing.*;
 import java.awt.*;
 
-public class Label extends JLabel implements Display {
+public class Button extends JButton implements Display {
 	protected final TetrisPart parent;
 	protected final Float squareSizeMult;
 	private final Coordinates start;
 	private final Coordinates dimensions;
 	
-	public Label(TetrisPart parent,Float squareSizeMult,Coordinates start,Coordinates dimensions) {
+	public Button(TetrisPart parent,Float squareSizeMult,Coordinates start,Coordinates dimensions) {
 		this.parent = parent;
 		this.squareSizeMult = squareSizeMult;
 		this.start = start;
 		this.dimensions = dimensions;
-		setOpaque(false);
+		setOpaque(true);
 		setLayout(null);
 		horizontal(CENTER);
 		vertical(CENTER);
 		setForeground(Colors.BLACK.body());
 	}
 	
-	public Label(TetrisPart parent,int squareSizeMult,int startRow) {
-		this(parent,(float) squareSizeMult,new Coordinates(startRow,0),new Coordinates(squareSizeMult,parent.columns()));
-	}
-	
-	public Label horizontal(int alignment) {
+	public Button horizontal(int alignment) {
 		setHorizontalAlignment(alignment);
 		return this;
 	}
 	
-	public Label vertical(int alignment) {
+	public Button vertical(int alignment) {
 		setVerticalAlignment(alignment);
 		return this;
 	}
 	
-	public Label text(String text) {
+	public Button text(String text) {
 		setText(text);
 		return this;
 	}

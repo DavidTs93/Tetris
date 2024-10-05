@@ -1,11 +1,11 @@
 package me.DavidTs93.Tetris.Components;
 
-import me.DavidTs93.Tetris.Coordinates;
 import me.DavidTs93.Tetris.Displays.Label;
 import me.DavidTs93.Tetris.Displays.PiecePanel;
+import me.DavidTs93.Tetris.Info.Coordinates;
+import me.DavidTs93.Tetris.Info.TurnInfo;
+import me.DavidTs93.Tetris.Parts.Tetromino;
 import me.DavidTs93.Tetris.TetrisGame;
-import me.DavidTs93.Tetris.Tetromino;
-import me.DavidTs93.Tetris.TurnInfo;
 
 import javax.swing.*;
 import java.util.HashMap;
@@ -16,7 +16,7 @@ public class Statistics extends Component {
 	
 	public Statistics(TetrisGame game) {
 		super(game);
-		add(new Label(this,1,new Coordinates(1,0)).text("STATISTICS"));
+		add(new Label(this,1,1).text("STATISTICS"));
 		this.statistics = new HashMap<>();
 		for (Tetromino tetromino : Tetromino.values()) this.statistics.put(tetromino,new Statistic(this,tetromino));
 	}
@@ -55,7 +55,7 @@ public class Statistics extends Component {
 		
 		private Statistic(Statistics parent,Tetromino tetromino) {
 			parent.add(new PiecePanel(parent,(piece,rotation) -> new Coordinates(rowTetromino(piece),parent.centerColumn() - parent.startColumn() - 2)).piece(tetromino));
-			this.label = new Label(parent,1,new Coordinates(rowText(tetromino),1),new Coordinates(1,parent.columns() - 2)).horizontal(SwingConstants.RIGHT);
+			this.label = new Label(parent,null,new Coordinates(rowText(tetromino),1),new Coordinates(1,parent.columns() - 2)).horizontal(SwingConstants.RIGHT);
 			parent.add(this.label);
 			reset();
 		}

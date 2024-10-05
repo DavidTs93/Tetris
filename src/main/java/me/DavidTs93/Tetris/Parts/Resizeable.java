@@ -1,4 +1,4 @@
-package me.DavidTs93.Tetris;
+package me.DavidTs93.Tetris.Parts;
 
 public interface Resizeable {
 	void resize();

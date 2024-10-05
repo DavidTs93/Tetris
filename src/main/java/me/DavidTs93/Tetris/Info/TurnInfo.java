@@ -1,4 +1,6 @@
-package me.DavidTs93.Tetris;
+package me.DavidTs93.Tetris.Info;
+
+import me.DavidTs93.Tetris.Parts.Tetromino;
 
 public final class TurnInfo {
 	private Tetromino piece;

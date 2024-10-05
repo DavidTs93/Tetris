@@ -1,14 +1,20 @@
 package me.DavidTs93.Tetris.Components;
 
-import me.DavidTs93.Tetris.*;
 import me.DavidTs93.Tetris.Displays.PiecePanel;
+import me.DavidTs93.Tetris.Info.Coordinates;
+import me.DavidTs93.Tetris.Info.Rotation;
+import me.DavidTs93.Tetris.Info.State;
+import me.DavidTs93.Tetris.Info.TurnInfo;
+import me.DavidTs93.Tetris.Parts.Colors;
+import me.DavidTs93.Tetris.Parts.MoveType;
+import me.DavidTs93.Tetris.Parts.Resizeable;
+import me.DavidTs93.Tetris.Parts.Tetromino;
+import me.DavidTs93.Tetris.TetrisGame;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,26 +48,17 @@ public class Board extends Component implements ActionListener {
 		add(this.piecePanel);
 		this.boardPanel = new BoardPanel();
 		add(this.boardPanel);
-		addKeyListener(new DownAdapter());
-	}
-	
-	private class DownAdapter extends KeyAdapter {
-		@Override
-		public void keyPressed(KeyEvent e) {
-			System.out.println("DOWN");
-			if (e.getKeyCode() == KeyEvent.VK_DOWN) game().update(update(MoveType.DOWN));
-		}
 	}
 	
 	@Override
-	public void changeState(TetrisGame.State oldState,TetrisGame.State newState) {
-		if (newState.isGameOver()){
-			timer.stop();
+	public void changeState(State oldState,State newState) {
+		if (newState.isGameOver()) {
+			if (timer != null) timer.stop();
 			timer = null;
 		} else if (oldState.isGameOver()) {
-			if (newState.isGameRunning()) {	// start
-				this.board = new Colors[endRow() - startRow() + 1][endColumn() - startColumn() + 1];
-				piecePanel.repaint();
+			if (newState.isGameRunning()) {
+				board = new Colors[endRow() - startRow() + 1][endColumn() - startColumn() + 1];
+				piecePanel.redraw();
 				setTimer(Level.START_LEVEL);
 			}
 		} else if (oldState.isGameRunning()) {
@@ -118,7 +115,7 @@ public class Board extends Component implements ActionListener {
 		List<Integer> removed = new ArrayList<>();
 		completable.thenRun(() -> removeRemovedLines(removed));
 		for (int row = coordinates.row() - height + 1; row <= coordinates.row(); row++) {
-			if (row >= board.length) continue;
+			if (row < 0 || row >= board.length) continue;
 			boolean hasEmpty = false;
 			for (Colors colors : board[row]) if (colors == null) {
 				hasEmpty = true;
@@ -239,13 +236,17 @@ public class Board extends Component implements ActionListener {
 	}
 	
 	public void update(TurnInfo info) {
-		if (!Boolean.TRUE.equals(info.turnOver())) return;
+		if (!Boolean.TRUE.equals(info.turnOver())) {
+			piecePanel.repaint();
+			return;
+		}
 		if (Boolean.TRUE.equals(info.levelAdd())) setTimer(info.levelNew());
 		if (!newPiece(info.piece())) info.lose(true);
+		piecePanel.redraw();
 	}
 	
 	public CompletableFuture<TurnInfo> update(MoveType moveType) {
-		if (piece() == null || game().state() != TetrisGame.State.PLAY) return CompletableFuture.completedFuture(null);
+		if (piece() == null || game().state() != State.PLAY) return CompletableFuture.completedFuture(null);
 		switch (moveType) {
 			case RIGHT: return CompletableFuture.completedFuture(move(true));
 			case LEFT: return CompletableFuture.completedFuture(move(false));
@@ -274,7 +275,10 @@ public class Board extends Component implements ActionListener {
 	}
 	
 	public void actionPerformed(ActionEvent e) {
-		game().update(downTimer());
+		if (game().state().isGameOver()) {
+			timer.stop();
+			timer = null;
+		} else game().update(downTimer());
 	}
 	
 	private class BoardPanel extends JPanel implements Resizeable {
@@ -305,8 +309,8 @@ public class Board extends Component implements ActionListener {
 		
 		public void resize() {
 			Coordinates start = game().indexToPosition(new Coordinates(1,1));
-			Coordinates add = game().indexToPosition(new Coordinates(rows(),columns()));
-			setBounds(start.column(),start.row(),add.column(),add.row());
+			Coordinates dimensions = game().indexToPosition(new Coordinates(rows(),columns()));
+			setBounds(start.column(),start.row(),dimensions.column(),dimensions.row());
 			repaint();
 		}
 	}

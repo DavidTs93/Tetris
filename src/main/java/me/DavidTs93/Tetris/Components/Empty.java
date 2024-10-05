@@ -1,7 +1,7 @@
 package me.DavidTs93.Tetris.Components;
 
+import me.DavidTs93.Tetris.Info.TurnInfo;
 import me.DavidTs93.Tetris.TetrisGame;
-import me.DavidTs93.Tetris.TurnInfo;
 
 public class Empty extends Component {
 	public Empty(TetrisGame game) {
@@ -9,10 +9,14 @@ public class Empty extends Component {
 	}
 	
 	@Override
-	protected void setBackground() {}
+	public boolean hasBorder() {
+		return false;
+	}
 	
 	@Override
-	protected void setBorder() {}
+	public boolean hasBackground() {
+		return false;
+	}
 	
 	public void newGame(TurnInfo info) {}
 	

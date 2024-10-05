@@ -1,4 +1,8 @@
-package me.DavidTs93.Tetris;
+package me.DavidTs93.Tetris.Parts;
+
+import me.DavidTs93.Tetris.Info.Coordinates;
+import me.DavidTs93.Tetris.Info.Rotation;
+import me.DavidTs93.Tetris.TetrisGame;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -112,9 +116,7 @@ public enum Tetromino {
 		int n = matrix.length;
 		if (diff >= n) return false;
 		for (boolean b : matrix[n - diff - 1]) if (b) return false;
-//		for (boolean b : matrix[matrix.length - 2]) if (b) return false;
 		return true;
-//		return false;
 	}
 	
 	private boolean testPlacingBoard(boolean[][] matrix,Coordinates coordinates,Object[][] board) {

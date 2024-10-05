@@ -1,9 +1,9 @@
 package me.DavidTs93.Tetris.Components;
 
-import me.DavidTs93.Tetris.Coordinates;
 import me.DavidTs93.Tetris.Displays.Label;
+import me.DavidTs93.Tetris.Info.State;
+import me.DavidTs93.Tetris.Info.TurnInfo;
 import me.DavidTs93.Tetris.TetrisGame;
-import me.DavidTs93.Tetris.TurnInfo;
 
 public class Title extends Component {
 	private final Label top;
@@ -11,28 +11,32 @@ public class Title extends Component {
 	
 	public Title(TetrisGame game) {
 		super(game);
-		this.top = new Label(this,2,new Coordinates(0,0));
-		this.bottom = new Label(this,1,new Coordinates(2,0));
+		this.top = new Label(this,2,0);
+		this.bottom = new Label(this,1,2);
 		setOpaque(false);
 		add(this.top);
 		add(this.bottom);
-		update(game.state());
+		update(game.state(),true);
 	}
 	
 	@Override
-	protected void setBackground() {}
-	
-	@Override
-	protected void setBorder() {}
-	
-	@Override
-	public void changeState(TetrisGame.State oldState,TetrisGame.State newState) {
-		update(newState);
+	public boolean hasBorder() {
+		return false;
 	}
 	
-	private void update(TetrisGame.State state) {
+	@Override
+	public boolean hasBackground() {
+		return false;
+	}
+	
+	@Override
+	public void changeState(State oldState,State newState) {
+		update(newState,!game().inputPaused());
+	}
+	
+	private void update(State state,boolean displayBottom) {
 		top.setText(state.top());
-		bottom.setText(state.bottom());
+		if (displayBottom) bottom.setText(state.bottom());
 		repaint();
 	}
 	

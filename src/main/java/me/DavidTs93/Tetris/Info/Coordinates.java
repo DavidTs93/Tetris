@@ -1,4 +1,4 @@
-package me.DavidTs93.Tetris;
+package me.DavidTs93.Tetris.Info;
 
 public class Coordinates {
 	private final int row;
@@ -21,8 +21,24 @@ public class Coordinates {
 		return new Coordinates(row() + row,column() + column);
 	}
 	
+	public Coordinates add(Coordinates coordinates) {
+		return add(coordinates.row(),coordinates.column());
+	}
+	
 	public Coordinates subtract(int row,int column) {
 		return new Coordinates(row() - row,column() - column);
+	}
+	
+	public Coordinates subtract(Coordinates coordinates) {
+		return subtract(coordinates.row(),coordinates.column());
+	}
+	
+	public Coordinates row(int row) {
+		return new Coordinates(row,column);
+	}
+	
+	public Coordinates column(int column) {
+		return new Coordinates(row,column);
 	}
 	
 	public boolean equals(Object obj) {
@@ -32,6 +48,6 @@ public class Coordinates {
 	}
 	
 	public String toString() {
-		return "Coordinates{column=" + column + ", row=" + row + "}";
+		return "Coordinates{row=" + row + ", column=" + column + "}";
 	}
 }

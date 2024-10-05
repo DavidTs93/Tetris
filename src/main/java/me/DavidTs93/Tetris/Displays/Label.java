@@ -25,8 +25,8 @@ public class Label extends JLabel implements Display {
 		setForeground(Colors.BLACK.body());
 	}
 	
-	public Label(TetrisPart parent,int squareSizeMult,int startRow) {
-		this(parent,(float) squareSizeMult,new Coordinates(startRow,0),new Coordinates(squareSizeMult,parent.columns()));
+	public Label(TetrisPart parent,float squareSizeMult,int startRow) {
+		this(parent,squareSizeMult,new Coordinates(startRow,0),new Coordinates((int) Math.ceil(squareSizeMult),parent.columns()));
 	}
 	
 	public Label horizontal(int alignment) {
@@ -69,6 +69,6 @@ public class Label extends JLabel implements Display {
 	}
 	
 	public void afterResize() {
-		setFont(new Font(Font.SANS_SERIF,Font.PLAIN,squareSizeMult == null || squareSizeMult == 1 ? parent.game().squareSize() : (int) (parent.game().squareSize() * squareSizeMult + 0.5f)));
+		setFont(new Font(Font.SANS_SERIF,Font.PLAIN,sizeWithSquareSizeMult(squareSizeMult)));
 	}
 }

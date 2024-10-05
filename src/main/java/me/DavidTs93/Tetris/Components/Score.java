@@ -1,9 +1,14 @@
 package me.DavidTs93.Tetris.Components;
 
 import me.DavidTs93.Tetris.Displays.Label;
+import me.DavidTs93.Tetris.Info.Database;
+import me.DavidTs93.Tetris.Info.ScoreRecords;
 import me.DavidTs93.Tetris.Info.TurnInfo;
 import me.DavidTs93.Tetris.TetrisGame;
 
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
 import java.util.Objects;
 
 public class Score extends Component {
@@ -11,19 +16,47 @@ public class Score extends Component {
 	public static final int SCORE_LENGTH = (int) Math.ceil(Math.log10(MAX_SCORE));
 	public static final String FORMAT = "%" + String.format("%02d",SCORE_LENGTH) + "d";
 	
+	private final Database database;
+	private final Label labelScoreTop;
+	private final Label labelScore;
 	private int score;
-	private final Label label;
 	
-	public Score(TetrisGame game) {
+	public Score(TetrisGame game) throws SQLException, IOException,ClassNotFoundException {
 		super(game);
-		add(new Label(this,2,1).text("SCORE"));
-		this.label = new Label(this,2,5);
-		add(this.label);
+		this.database = new Database();
+		add(new Label(this,2,1).text("TOP"));
+		this.labelScoreTop = new Label(this,2,3);
+		add(this.labelScoreTop);
+		add(new Label(this,2,6).text("SCORE"));
+		this.labelScore = new Label(this,2,8);
+		add(this.labelScore);
+		updateTopScore();
 		update();
 	}
 	
+	private void updateTopScore() {
+		try {
+			List<ScoreRecords> records = database.highScores(1);
+			ScoreRecords record;
+			if (records.isEmpty()) record = new ScoreRecords(0);
+			else record = records.get(0);
+			labelScoreTop.setText(String.format(Score.FORMAT,record.score()));
+		} catch (Exception e) {
+			e.printStackTrace();	// FIXME
+		}
+	}
+	
 	private void update() {
-		label.setText(String.format(FORMAT,score));
+		labelScore.setText(String.format(FORMAT,score));
+	}
+	
+	public void addScore(String name) {
+		try {
+			database.addScore(name,score);
+			updateTopScore();
+		} catch (Exception e) {
+			e.printStackTrace();	// FIXME
+		}
 	}
 	
 	public void newGame(TurnInfo info) {
@@ -69,7 +102,7 @@ public class Score extends Component {
 	}
 	
 	public int endRow() {
-		return 13;
+		return 16;
 	}
 	
 	public int endColumn() {

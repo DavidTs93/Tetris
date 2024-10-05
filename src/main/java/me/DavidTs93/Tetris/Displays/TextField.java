@@ -29,8 +29,8 @@ public class TextField extends JTextField implements Display {
 		setBackground();
 	}
 	
-	public TextField(TetrisPart parent,int squareSizeMult,int startRow,Integer maxLength) {
-		this(parent,(float) squareSizeMult,new Coordinates(startRow,0),new Coordinates(squareSizeMult,parent.columns()),maxLength);
+	public TextField(TetrisPart parent,float squareSizeMult,int startRow,Integer maxLength) {
+		this(parent,squareSizeMult,new Coordinates(startRow,0),new Coordinates((int) Math.ceil(squareSizeMult),parent.columns()),maxLength);
 	}
 	
 	@Override
@@ -83,7 +83,7 @@ public class TextField extends JTextField implements Display {
 	}
 	
 	public void afterResize() {
-		setFont(new Font(Font.SANS_SERIF,Font.PLAIN,squareSizeMult == null || squareSizeMult == 1 ? parent.game().squareSize() : (int) (parent.game().squareSize() * squareSizeMult + 0.5f)));
+		setFont(new Font(Font.SANS_SERIF,Font.PLAIN,sizeWithSquareSizeMult(squareSizeMult)));
 	}
 	
 	private static class LimitedDocument extends PlainDocument {

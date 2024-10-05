@@ -65,6 +65,6 @@ public class Button extends JButton implements Display {
 	}
 	
 	public void afterResize() {
-		setFont(new Font(Font.SANS_SERIF,Font.PLAIN,squareSizeMult == null || squareSizeMult == 1 ? parent.game().squareSize() : (int) (parent.game().squareSize() * squareSizeMult + 0.5f)));
+		setFont(new Font(Font.SANS_SERIF,Font.PLAIN,sizeWithSquareSizeMult(squareSizeMult)));
 	}
 }

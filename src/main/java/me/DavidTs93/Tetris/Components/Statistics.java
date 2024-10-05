@@ -16,7 +16,7 @@ public class Statistics extends Component {
 	
 	public Statistics(TetrisGame game) {
 		super(game);
-		add(new Label(this,1,1).text("STATISTICS"));
+		add(new Label(this,1.5f,1).text("STATISTICS"));
 		this.statistics = new HashMap<>();
 		for (Tetromino tetromino : Tetromino.values()) this.statistics.put(tetromino,new Statistic(this,tetromino));
 	}
@@ -36,7 +36,7 @@ public class Statistics extends Component {
 	}
 	
 	public int startColumn() {
-		return 2;
+		return 1;
 	}
 	
 	public int endRow() {
@@ -48,7 +48,7 @@ public class Statistics extends Component {
 	}
 	
 	private static class Statistic {
-		private static final String FORMAT = "%" + String.format("%02d",Level.LEVEL_LENGTH + 1) + "d";
+		private static final String FORMAT = "%04d";
 		
 		private int amount;
 		private final Label label;

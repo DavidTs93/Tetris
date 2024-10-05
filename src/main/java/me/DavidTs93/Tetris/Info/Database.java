@@ -80,7 +80,7 @@ public class Database {
 	
 	public void addScore(String name,int score) throws SQLException {
 		if (score > 0) try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement("INSERT INTO " + TABLE + " (Name,Score) VALUES(?,?);")) {
-			statement.setString(1,name);
+			statement.setString(1,name == null ? "" : name.trim());
 			statement.setInt(2,score);
 			if (statement.executeUpdate() <= 0) throw new SQLException("Couldn't add new record");
 		}

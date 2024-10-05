@@ -8,22 +8,23 @@ import me.DavidTs93.Tetris.TetrisGame;
 public class Level extends Component {
 	public static final int START_LEVEL = 0;
 	public static final int MAX_LEVEL = 99;
-	public static final int LEVEL_LENGTH = (int) Math.ceil(Math.log10(MAX_LEVEL));
+	private static final int LEVEL_LENGTH = (int) Math.ceil(Math.log10(MAX_LEVEL));
 	private static final String FORMAT = "%" + String.format("%02d",LEVEL_LENGTH) + "d";
 	
 	private int level = 0;
 	private int levelLines = 0;
-	private final Label label;
+	private final Label labelLevel;
 	
 	public Level(TetrisGame game) {
 		super(game);
-		this.label = new Label(this,1,1);
-		add(this.label);
+		add(new Label(this,1,1).text("LEVEL"));
+		this.labelLevel = new Label(this,1,3);
+		add(this.labelLevel);
 		update();
 	}
 	
 	private void update() {
-		label.setText("LEVEL - " + String.format(FORMAT,level));
+		labelLevel.setText(String.format(FORMAT,level));
 	}
 	
 	@Override
@@ -63,7 +64,7 @@ public class Level extends Component {
 	}
 	
 	public int startRow() {
-		return 15;
+		return 25;
 	}
 	
 	public int startColumn() {
@@ -71,7 +72,7 @@ public class Level extends Component {
 	}
 	
 	public int endRow() {
-		return 17;
+		return 29;
 	}
 	
 	public int endColumn() {

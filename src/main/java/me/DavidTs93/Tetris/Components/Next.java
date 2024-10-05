@@ -10,11 +10,13 @@ import me.DavidTs93.Tetris.TetrisGame;
 
 public class Next extends Component {
 	private final PiecePanel piecePanel;
+	private final int calcRow;
 	
 	public Next(TetrisGame game) {
 		super(game);
+		this.calcRow = (startRow() + endRow() - 1) / 2 - startRow();
 		add(new Label(this,1,1).text("NEXT"));
-		this.piecePanel = new PiecePanel(this,(tetromino,rotation) -> new Coordinates(endRow() - startColumn() + (tetromino.height(rotation) % 2 == 0 ? 0 : 1),centerColumn() - startColumn() - (tetromino.width(rotation) % 2 == 0 ? 1 : 0))).noDisplayOnStart(true);
+		this.piecePanel = new PiecePanel(this,(tetromino,rotation) -> new Coordinates(calcRow + (tetromino.height(rotation) % 2 == 0 ? 0 : 1),centerColumn() - startColumn() - (tetromino.width(rotation) % 2 == 0 ? 1 : 0))).noDisplayOnStart(true);
 		add(this.piecePanel);
 	}
 	
@@ -54,7 +56,7 @@ public class Next extends Component {
 	}
 	
 	public int startRow() {
-		return 19;
+		return 18;
 	}
 	
 	public int startColumn() {
@@ -62,7 +64,7 @@ public class Next extends Component {
 	}
 	
 	public int endRow() {
-		return 24;
+		return 23;
 	}
 	
 	public int endColumn() {

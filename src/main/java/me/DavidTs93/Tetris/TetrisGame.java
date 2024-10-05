@@ -29,7 +29,7 @@ public class TetrisGame extends JLayeredPane implements ActionListener,TetrisPar
 	private int unit,squareSize;
 	private State state;
 	private final Board board;
-	private final HighScore highScore;
+	private final Score score;
 	private final List<Component> components;
 	private final InputPanel nameInput;
 	private final List<Resizeable> resizeables;
@@ -39,9 +39,9 @@ public class TetrisGame extends JLayeredPane implements ActionListener,TetrisPar
 	public TetrisGame() throws SQLException,IOException,ClassNotFoundException {
 		this.state = State.START;
 		this.board = new Board(this);
-		this.highScore = new HighScore(this);
-		this.components = Stream.of(new Empty(this),new Title(this),new Next(this),new Statistics(this),new Lines(this),new Level(this),new Score(this),this.board,this.highScore).collect(Collectors.toList());
-		this.nameInput = new InputPanel(this,this::nameSubmit,this::nameCancel,InputPanel.defaultStart(new Coordinates(6,2),new Coordinates(24,28),InputPanel.DEFAULT_TOTAL_DIMENSIONS),InputPanel.DEFAULT_TOTAL_DIMENSIONS);
+		this.score = new Score(this);
+		this.components = Stream.of(new Empty(this),new Title(this),new Next(this),new Statistics(this),new Lines(this),new Level(this),this.score,this.board).collect(Collectors.toList());
+		this.nameInput = new InputPanel(this,this::nameSubmit,this::nameSubmit,InputPanel.defaultStart(new Coordinates(6,2),new Coordinates(24,28),InputPanel.DEFAULT_TOTAL_DIMENSIONS),InputPanel.DEFAULT_TOTAL_DIMENSIONS);
 		this.resizeables = new ArrayList<>();
 		List<Component> componentsAdd = new ArrayList<>(this.components);
 		Collections.reverse(componentsAdd);
@@ -70,12 +70,7 @@ public class TetrisGame extends JLayeredPane implements ActionListener,TetrisPar
 	}
 	
 	private void nameSubmit(String name) {
-		name = name.trim();
-		if (!name.isEmpty()) highScore.addScore(name);
-		nameCancel();
-	}
-	
-	private void nameCancel() {
+		score.addScore(name);
 		remove(nameInput);
 		unpauseInput();
 		changeState(state);

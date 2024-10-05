@@ -12,6 +12,10 @@ public interface TetrisPart {
 	
 	TetrisGame game();
 	
+	default int sizeWithSquareSizeMult(Float squareSizeMult) {
+		return squareSizeMult == null || squareSizeMult == 1 ? game().squareSize() : (int) (game().squareSize() * squareSizeMult + 0.5f);
+	}
+	
 	boolean isOpaque();
 	
 	default boolean hasBackground() {

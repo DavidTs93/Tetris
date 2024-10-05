@@ -14,10 +14,10 @@ public class InputPanel extends JPanel implements Display {
 	public static final Coordinates DEFAULT_TEXT_DIMENSIONS = new Coordinates(DEFAULT_TEXT_SIZE + 2,16);
 	public static final Coordinates DEFAULT_TEXT_START = new Coordinates(1,1);
 	private static final int DEFAULT_TOTAL_COLUMNS = DEFAULT_TEXT_START.column() * 2 + DEFAULT_TEXT_DIMENSIONS.column();
-	public static final Coordinates DEFAULT_BUTTONS_DIFF = new Coordinates(DEFAULT_BUTTON_DIMENSIONS.row() + 1,0);
+//	public static final Coordinates DEFAULT_BUTTONS_DIFF = new Coordinates(DEFAULT_BUTTON_DIMENSIONS.row() + 1,0);
 	public static final Coordinates DEFAULT_SUBMIT_START = new Coordinates(DEFAULT_TEXT_START.add(DEFAULT_TEXT_DIMENSIONS).row() + 1,(DEFAULT_TOTAL_COLUMNS - DEFAULT_BUTTON_DIMENSIONS.column()) / 2);
-	public static final Coordinates DEFAULT_CANCEL_START = DEFAULT_SUBMIT_START.add(DEFAULT_BUTTONS_DIFF);
-	public static final Coordinates DEFAULT_TOTAL_DIMENSIONS = new Coordinates(DEFAULT_CANCEL_START.add(DEFAULT_BUTTON_DIMENSIONS).row() + 1,DEFAULT_TOTAL_COLUMNS);
+//	public static final Coordinates DEFAULT_CANCEL_START = DEFAULT_SUBMIT_START.add(DEFAULT_BUTTONS_DIFF);
+	public static final Coordinates DEFAULT_TOTAL_DIMENSIONS = new Coordinates(DEFAULT_SUBMIT_START.add(DEFAULT_BUTTON_DIMENSIONS).row() + 1,DEFAULT_TOTAL_COLUMNS);
 	
 	public static Coordinates defaultStart(Coordinates start,Coordinates dimensions,Coordinates inputPanelDimensions) {
 		return new Coordinates(start.row() + (dimensions.row() - inputPanelDimensions.row()) / 2,start.column() + (dimensions.column() - inputPanelDimensions.column()) / 2);
@@ -28,32 +28,28 @@ public class InputPanel extends JPanel implements Display {
 	private final Coordinates dimensions;
 	private final TextField textField;
 	private final Button submit;
-	private final Button cancel;
 	
-	public InputPanel(TetrisPart parent,Consumer<String> onSubmit,Runnable onCancel) {
+	public InputPanel(TetrisPart parent,Consumer<String> onSubmit,Consumer<String> onCancel) {
 		this(parent,onSubmit,onCancel,defaultStart(new Coordinates(0,0),parent.dimensions(),DEFAULT_TOTAL_DIMENSIONS),DEFAULT_TOTAL_DIMENSIONS);
 	}
 	
-	public InputPanel(TetrisPart parent,Consumer<String> onSubmit,Runnable onCancel,Coordinates start,Coordinates dimensions) {
-		this(parent,onSubmit,onCancel,start,dimensions,(float) DEFAULT_TEXT_SIZE,DEFAULT_TEXT_START,DEFAULT_TEXT_DIMENSIONS,DEFAULT_TEXT_MAX_LENGTH,null,DEFAULT_SUBMIT_START,DEFAULT_BUTTON_DIMENSIONS,null,DEFAULT_CANCEL_START,DEFAULT_BUTTON_DIMENSIONS);
+	public InputPanel(TetrisPart parent,Consumer<String> onSubmit,Consumer<String> onCancel,Coordinates start,Coordinates dimensions) {
+		this(parent,onSubmit,onCancel,start,dimensions,(float) DEFAULT_TEXT_SIZE,DEFAULT_TEXT_START,DEFAULT_TEXT_DIMENSIONS,DEFAULT_TEXT_MAX_LENGTH,null,DEFAULT_SUBMIT_START,DEFAULT_BUTTON_DIMENSIONS);
 	}
 	
-	public InputPanel(TetrisPart parent,Consumer<String> onSubmit,Runnable onCancel,Coordinates start,Coordinates dimensions,
+	public InputPanel(TetrisPart parent,Consumer<String> onSubmit,Consumer<String> onCancel,Coordinates start,Coordinates dimensions,
 					  Float squareSizeMultText,Coordinates startText,Coordinates dimensionsText,Integer maxLengthText,
-					  Float squareSizeMultSubmit,Coordinates startSubmit,Coordinates dimensionsSubmit,
-					  Float squareSizeMultCancel,Coordinates startCancel,Coordinates dimensionsCancel) {
+					  Float squareSizeMultSubmit,Coordinates startSubmit,Coordinates dimensionsSubmit) {
 		this.parent = parent;
 		this.start = start;
 		this.dimensions = dimensions;
 		this.textField = new TextField(this,squareSizeMultText,startText,dimensionsText,maxLengthText).horizontal(SwingConstants.CENTER);
 		this.submit = new Button(this,squareSizeMultSubmit,startSubmit,dimensionsSubmit).text("SUBMIT");
-		this.cancel = new Button(this,squareSizeMultCancel,startCancel,dimensionsCancel).text("CANCEL");
 		setOpaque(true);
 		setLayout(null);
 		setFocusable(true);
 		add(this.textField);
 		add(this.submit);
-		add(this.cancel);
 		setBackground();
 		setBorder();
 		Action submitAction = new AbstractAction() {
@@ -63,11 +59,10 @@ public class InputPanel extends JPanel implements Display {
 		};
 		Action cancelAction = new AbstractAction() {
 			public void actionPerformed(ActionEvent e) {
-				onCancel.run();
+				onCancel.accept(textField.getText());
 			}
 		};
 		this.submit.addActionListener(submitAction);
-		this.cancel.addActionListener(cancelAction);
 		InputMap inputMap = getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 		ActionMap actionMap = getActionMap();
 		inputMap.put(KeyStroke.getKeyStroke("ESCAPE"),"cancel");
@@ -110,7 +105,6 @@ public class InputPanel extends JPanel implements Display {
 	public void afterResize() {
 		textField.resize();
 		submit.resize();
-		cancel.resize();
 		repaint();
 		textField.grabFocus();
 	}
